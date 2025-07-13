@@ -1,8 +1,8 @@
 terraform {
     backend "s3" {
-        bucket = "ya-nextjs-web"
+        bucket = "ya-my-tf-website-state"
         key = "global/s3/terraform.tfstate"
         region = "us-west-1"
-        dynamodb_table = "terraform-lock-file"
+        dynamodb_table = "my-db-website-table"
     }
 }

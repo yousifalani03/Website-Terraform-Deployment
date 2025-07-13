@@ -3,20 +3,14 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "nextjs_bucket" {
-    bucket = "ya-portfolio-bucket"
-
-    tags = {
-        Name = "Portfolio Website"
-        Environment = "Production"
-    }
-
+    bucket = "nextjs-portfolio-bucket-ya"
 }
 
 resource "aws_s3_bucket_ownership_controls" "nextjs_bucket_ownership_controls" {
     bucket = aws_s3_bucket.nextjs_bucket.id
 
     rule {
-        object_ownership = "BucketOwnerPrefferred" #gives complete control of bucket
+        object_ownership = "BucketOwnerPreferred" #gives complete control of bucket objects to only owner
     }
 }
 
@@ -32,30 +26,19 @@ resource "aws_s3_bucket_public_access_block" "nextjs_bucket_public_access_block"
 #Bucket ACL
 resource "aws_s3_bucket_acl" "nextjs_bucket_acl" {
     depends_on = [
-        aws_s3_bucket_ownership_controls.nextjs,
+        aws_s3_bucket_ownership_controls.nextjs_bucket_ownership_controls,
         aws_s3_bucket_public_access_block.nextjs_bucket_public_access_block
     ]
     bucket = aws_s3_bucket.nextjs_bucket.id
     acl = "public-read" #allows all to read inside bucket
 }
 
-resource "aws_s3_bucket_website_configuration" "ya-nextjs-config" {
-    bucket = aws_s3_bucket.website.id
-
-    index_document {
-        suffix = "index.html"
-    }
-    error_document {
-        key = "error.html"
-    }
-
-}
 
 resource "aws_s3_bucket_policy" "nextjs_bucket_policy" {
     bucket = aws_s3_bucket.nextjs_bucket.id
     #allows all access to objects in bucket
     policy = jsonencode({
-        Version = 2012-10-17
+        Version = "2012-10-17"
         Statement = [
             {
                 Sid = "PublicReadGetObject"
@@ -68,3 +51,53 @@ resource "aws_s3_bucket_policy" "nextjs_bucket_policy" {
     })
 }
 
+
+#Origin Access Identity
+resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
+    comment = "OAI for next.js portfolio site"
+}
+
+#Cloudfront distribution
+resource "aws_cloudfront_distribution" "nextjs_distribution" {
+    origin {
+        domain_name = aws_s3_bucket.nextjs_bucket.bucket_regional_domain_name #tells cloudfront where to fetch content from
+        origin_id = "S3-ya-nextjs-portfolio-bucket"
+
+        s3_origin_config {
+          origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
+        }
+    }
+
+    enabled = true
+    is_ipv6_enabled = true
+    comment = "Next.js portfolio site"
+    default_root_object = "index.html"
+
+    default_cache_behavior {
+      allowed_methods = ["GET", "HEAD", "OPTIONS"]
+      cached_methods = ["GET", "HEAD"]
+      target_origin_id = "S3-ya-nextjs-portfolio-bucket"
+
+      forwarded_values {
+        query_string = false
+        cookies {
+          forward = "none"
+        }
+      }
+
+      viewer_protocol_policy = "redirect-to-https"
+      min_ttl = 0
+      default_ttl = 3600
+      max_ttl = 86400
+    }
+
+    restrictions {
+        geo_restriction {
+          restriction_type = "none"
+        }
+    }
+
+    viewer_certificate {
+        cloudfront_default_certificate = true #tells cf to use default ssl and tsl certs
+    }
+}
