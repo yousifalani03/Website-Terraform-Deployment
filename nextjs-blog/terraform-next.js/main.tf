@@ -2,7 +2,7 @@ provider "aws" {
     region = "us-west-1"
 }
 
-resource "aws_s3_bucket" "nextjs_bucket" {
+resource "aws_s3_bucket" "nextjs_bucket" {  #s3 bucket to host static website
     bucket = "nextjs-portfolio-bucket-ya"
 }
 
@@ -58,14 +58,14 @@ resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
 }
 
 #Cloudfront distribution
-resource "aws_cloudfront_distribution" "nextjs_distribution" {
+resource "aws_cloudfront_distribution" "nextjs_distribution" { #CloudFront distribution to serve the content globally with caching and HTTPS.
     origin {
         domain_name = aws_s3_bucket.nextjs_bucket.bucket_regional_domain_name #tells cloudfront where to fetch content from
         origin_id = "S3-ya-nextjs-portfolio-bucket"
 
         s3_origin_config {
           origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
-        }
+        } #Linked the S3 bucket to CloudFront using an Origin Access Identity (OAI) to secure the bucket
     }
 
     enabled = true
