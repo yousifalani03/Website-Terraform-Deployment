@@ -23,6 +23,9 @@ Deploy a **fast**, **scalable**, and **highly available** portfolio site globall
 - **S3 backend** to store Terraform `.tfstate`
 - Public access policy added to the S3 bucket
 
+Below is the screenshot of the deployed website and the link for it.
+(I ran terraform destroy and deleted the stack because I plan to add changes to this project in the future!)
+
 ![Deployed Site Screenshot](./Screenshot%202025-07-13%20163338.png)
 
 
