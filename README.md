@@ -2,6 +2,7 @@
 
 This project showcases how to deploy a Next.js website using AWS services and Infrastructure as Code (IaC) with Terraform and CloudFront.
 
+*Terraform files are in the terraform-next.js folder*
 ---
 
 ## 🚀 Project Goal
@@ -24,7 +25,6 @@ Deploy a **fast**, **scalable**, and **highly available** portfolio site globall
 
 ![Deployed Site Screenshot](./Screenshot%202025-07-13%20163338.png)
 
-[🔗 View Live Site (via CloudFront)](https://d26m4hjwwyhj.cloudfront.net)
 
 ---
 
